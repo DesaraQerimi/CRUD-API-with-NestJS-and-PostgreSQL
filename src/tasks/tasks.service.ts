@@ -13,6 +13,30 @@ export class TasksService {
     private usersService: UsersService){}
 
 
+  async userTasks(){
+    // const users = await this.usersService.findAll();
+    // console.log(users);
+    // return users.map((user) => {console.log(this.getTasks(user.id))
+    //   return 
+    // })
+    return await this.repo
+    .createQueryBuilder('task')
+    .leftJoinAndSelect('task.user', 'user')
+    .leftJoinAndSelect('task.project', 'project')
+    .where('task.status = :status', { status: 'Done' })
+    .select(['user.firstName', 'task.title' ])
+    .orderBy('user.id', 'ASC')
+    .getRawMany();
+  }
+
+  getTasks(id: number){
+    return this.repo.createQueryBuilder()
+    .select('title, Task.projectId')
+    .where( 'Task.userId = :id', {id: id})
+    .getRawMany();
+  } 
+
+
   async create(title: string, desctription: string, status: string, userId: number, projectId: number){
     const user = await this.usersService.find(userId);
     const project = await this.projectsService.find(projectId);
@@ -51,5 +75,18 @@ export class TasksService {
     }
   
     return this.repo.remove(task);
+  }
+
+  async getUnfinished(){
+    return await this.repo.find({ where: {status: 'Pending'} })
+  }
+
+  count(id: number){
+    return this.repo.createQueryBuilder()
+    .select('count(*)')
+    .where('Task.status = :status', {status: 'Done'})
+    .andWhere( 'Task.userId = :id', {id: id})
+    .getRawOne();
+
   }
 }
