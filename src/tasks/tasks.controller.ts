@@ -9,10 +9,33 @@ import { Task } from './task.entity';
 export class TasksController {
   constructor(private tasksService: TasksService ){}
 
+  @Get('/all')
+  async everyUserTask(){
+    return await this.tasksService.userTasks();
+  }
+
+
   @Post('/create') 
   @Serialize(TaskDto)
   async createTask(@Body() body: CreateTaskDto){
     return await this.tasksService.create(body.title, body.description, body.status, body.userId, body.projectId)
+  }
+
+  //Get all the users tasks and their project
+  @Get('/user/:id')
+   getInfo(@Param('id') id: string){
+    return this.tasksService.getTasks(parseInt(id));
+  }
+
+   //Get all the users tasks and their project
+   @Get('/done/:id')
+   countTask(@Param('id') id: string){
+    return this.tasksService.count(parseInt(id));
+  } 
+  //Get all unfinished tasks
+  @Get('/pending')
+  async getPending(){
+    return await this.tasksService.getUnfinished();
   }
 
   @Get('/:id')

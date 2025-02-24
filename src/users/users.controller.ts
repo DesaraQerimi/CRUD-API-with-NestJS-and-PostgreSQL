@@ -18,6 +18,10 @@ export class UsersController {
     return await this.usersService.find(parseInt(id));
   }
 
+  @Get()
+  allUsers(){
+    return this.usersService.findAll();
+  }
 
   @Patch('/:id')
   updateUser(@Param('id') id: string, @Body() body: Partial<User>){

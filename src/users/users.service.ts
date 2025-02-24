@@ -8,7 +8,10 @@ import { User } from './user.enitity';
 export class UsersService {
   constructor(@InjectRepository(User) private repo: Repository<User>){}
 
-  
+  findAll(){
+    return this.repo.find();
+  }
+
   
   createUser(firstName: string, lastName: string, email: string, location: string){
     const user = this.repo.create({firstName, lastName, email, location});
