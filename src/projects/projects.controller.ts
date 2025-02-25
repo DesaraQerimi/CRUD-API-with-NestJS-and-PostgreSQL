@@ -2,6 +2,7 @@ import { Post, Body, Controller, Get, Param, Patch, Delete } from '@nestjs/commo
 import { CreateProjectDto } from './dtos/create-project.dto';
 import { ProjectsService } from './projects.service';
 import { Project } from './project.entity';
+import { UpdateProjectDto } from './dtos/update-project.dto';
 
 @Controller('projects')
 export class ProjectsController {
@@ -18,7 +19,7 @@ export class ProjectsController {
   }
 
   @Patch('/:id')
-  updateUser(@Param('id') id: string, @Body() body: Partial<Project>){
+  updateUser(@Param('id') id: string, @Body() body: UpdateProjectDto){
     return this.projectsService.update(parseInt(id), body);
   }
   

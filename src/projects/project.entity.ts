@@ -10,7 +10,7 @@ export class Project{
   name: string;
 
   @Column()
-  desctription: string;
+  description: string;
 
   @CreateDateColumn()
   createdAt: Date;
