@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectsService } from 'src/projects/projects.service';
 import { UsersService } from 'src/users/users.service';
+import { UpdateTaskDto } from './dtos/update-task.dto';
 
 
 @Injectable()
@@ -14,19 +15,21 @@ export class TasksService {
 
 
   async userTasks(){
-    // const users = await this.usersService.findAll();
-    // console.log(users);
-    // return users.map((user) => {console.log(this.getTasks(user.id))
-    //   return 
-    // })
-    return await this.repo
-    .createQueryBuilder('task')
-    .leftJoinAndSelect('task.user', 'user')
-    .leftJoinAndSelect('task.project', 'project')
-    .where('task.status = :status', { status: 'Done' })
-    .select(['user.firstName', 'task.title' ])
-    .orderBy('user.id', 'ASC')
-    .getRawMany();
+    const users = await this.usersService.findAll();
+    console.log(users);
+    return Promise.all(users.map(async (user) => {
+      return {
+        userId: user.id,
+        tasks: await this.getTasks(user.id),
+      };
+    }))
+    // return await this.repo
+    // .createQueryBuilder('task')
+    // .leftJoinAndSelect('task.user', 'user')
+    // .where('task.status = :status', { status: 'Done' })
+    // .select(['user.firstName', 'task.title' ])
+    // .orderBy('user.id', 'ASC')
+    // .getRawMany();
   }
 
   getTasks(id: number){
@@ -55,16 +58,14 @@ export class TasksService {
     return this.repo.findOne({where: {id}});
   }
 
-  async update(id: number, newData: Partial<Task>){
+  async update(id: number, newData: UpdateTaskDto){
       
     const task = await this.find(id);
     if(!task){
       throw new NotFoundException('task not found');
     }
-    console.log(task, newData)
-    Object.assign(task, newData);
-    console.log(task)
-    return this.repo.save(task);
+    const updatedTask = {...task, ...newData};
+    return this.repo.save(updatedTask);
   }
   
   async remove(id: number){

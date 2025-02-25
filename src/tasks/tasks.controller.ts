@@ -4,6 +4,7 @@ import { CreateTaskDto } from './dtos/create-task.dto';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { TaskDto } from './dtos/task.dto';
 import { Task } from './task.entity';
+import { UpdateTaskDto } from './dtos/update-task.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -44,7 +45,7 @@ export class TasksController {
   }
 
   @Patch('/:id')
-  updateUser(@Param('id') id: string, @Body() body: Partial<Task>){
+  updateUser(@Param('id') id: string, @Body() body: UpdateTaskDto){
     return this.tasksService.update(parseInt(id), body);
   }
   
