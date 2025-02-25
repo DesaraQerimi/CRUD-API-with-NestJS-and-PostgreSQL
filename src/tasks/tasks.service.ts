@@ -40,11 +40,11 @@ export class TasksService {
   } 
 
 
-  async create(title: string, desctription: string, status: string, userId: number, projectId: number){
+  async create(title: string, description: string, status: string, userId: number, projectId: number){
     const user = await this.usersService.find(userId);
     const project = await this.projectsService.find(projectId);
 
-    const task = this.repo.create({title, desctription, status});
+    const task = this.repo.create({title, description, status});
   
     if(!user || !project) throw new NotFoundException('User or project not found');
 
