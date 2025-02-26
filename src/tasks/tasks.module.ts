@@ -7,10 +7,12 @@ import { ProjectsService } from 'src/projects/projects.service';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/user.enitity';
 import { Project } from 'src/projects/project.entity';
+import { UsersModule } from 'src/users/users.module';
+import { ProjectsModule } from 'src/projects/projects.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Task, User, Project])],
+  imports: [TypeOrmModule.forFeature([Task]), UsersModule, ProjectsModule],
   controllers: [TasksController],
-  providers: [TasksService, ProjectsService, UsersService]
+  providers: [TasksService]
 })
 export class TasksModule {}

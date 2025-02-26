@@ -1,4 +1,4 @@
-import { Post, Body, Controller, Get, Param, Patch, Delete } from '@nestjs/common';
+import { Post, Body, Controller, Get, Param, Patch, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { CreateProjectDto } from './dtos/create-project.dto';
 import { ProjectsService } from './projects.service';
 import { Project } from './project.entity';
@@ -9,22 +9,22 @@ export class ProjectsController {
   constructor(private projectsService: ProjectsService){}
 
   @Post('/create')
-  async createProject(@Body() body: CreateProjectDto){
-    return await this.projectsService.create(body.name, body.description);
+  async createProject(@Body() body: CreateProjectDto): Promise<Project>{
+    return await this.projectsService.create(body);
   }
 
   @Get('/:id')
-  async getProject(@Param('id') id: string){
-    return await this.projectsService.find(parseInt(id));
+  async getProject(@Param('id', ParseUUIDPipe) id: string): Promise<Project>{
+    return await this.projectsService.find(id);
   }
 
   @Patch('/:id')
-  updateUser(@Param('id') id: string, @Body() body: UpdateProjectDto){
-    return this.projectsService.update(parseInt(id), body);
+  updateUser(@Param('id', ParseUUIDPipe) id: string, @Body() body: UpdateProjectDto): Promise<Project>{
+    return this.projectsService.update(id, body);
   }
   
   @Delete('/:id')
-  removeUser(@Param('id') id: string){
-    return this.projectsService.remove(parseInt(id));
+  removeUser(@Param('id', ParseUUIDPipe) id: string): Promise<Project>{
+    return this.projectsService.remove(id);
   }  
 }

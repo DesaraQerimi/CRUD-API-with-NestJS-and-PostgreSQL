@@ -15,9 +15,9 @@ export class TaskDto {
 
   @Transform(({obj}) => obj.user.id)
   @Expose()
-  userId: number;
+  userId: string;
 
   @Transform(({obj}) => obj.project.id)
   @Expose()
-  projectId: number;
+  projectId: string;
 }

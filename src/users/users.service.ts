@@ -1,32 +1,46 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.enitity';
 import { UpdateUserDto } from './dtos/update-user.dto';
-
+import { CreateUserDto } from './dtos/create-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectRepository(User) private repo: Repository<User>){}
 
-  findAll(){
-    return this.repo.find();
+  findAll(): Promise<User[]> {
+    return this.repo.find({relations: ['tasks']});
   }
 
-  
-  createUser(firstName: string, lastName: string, email: string, location: string){
-    const user = this.repo.create({firstName, lastName, email, location});
-
-    return this.repo.save(user);
+  async count(id: string): Promise<Number> {
+    const user = await this.repo.findOne({relations: ['tasks'], where: {id}});
+    if(!user) throw new NotFoundException ('User not found');
+    return user.tasks.length;
   }
 
-  find(id: number){
-    const user = this.repo.findOne({where: {id}})
-    
+  async createUser(newUserInfo: CreateUserDto): Promise<User> {
+    const user = await this.findByEmail(newUserInfo.email);
+    if(user) throw new BadRequestException('Email in use!')
+    const newUser = this.repo.create(newUserInfo);
+
+    return this.repo.save(newUser);
+  }
+
+  async find(id: string): Promise<User>{
+    const user = await this.repo.findOne({where: {id}});
+
+    if(!user) throw new NotFoundException ('User not found');
+
     return user;
   }
 
-  async update(id: number, newData: UpdateUserDto){
+   findByEmail(email: string){
+    const user = this.repo.findOne({where: {email}})
+    return user;
+  }
+
+  async update(id: string, newData: UpdateUserDto): Promise<User>{
     
     const user = await this.find(id);
     if(!user){
@@ -37,7 +51,7 @@ export class UsersService {
     return this.repo.save(updatedUser);
   }
 
-  async remove(id: number){
+  async remove(id: string){
     const user = await this.find(id);
 
     if(!user){

@@ -1,6 +1,13 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm";
 import { Project } from "src/projects/project.entity";
 import { User } from "src/users/user.enitity";
+
+export enum Status {
+  DONE = 'Done',
+  PENDING = 'Pending',
+  IN_PROGRESS = 'In_progres'
+}
+
 @Entity()
 export class Task {
   @PrimaryGeneratedColumn()
@@ -12,8 +19,8 @@ export class Task {
   @Column()
   description: string;
   
-  @Column()
-  status: string;
+  @Column({type: "enum", enum: Status, default: Status.PENDING})
+  status: Status;
 
   @CreateDateColumn()
   createdAt: Date;

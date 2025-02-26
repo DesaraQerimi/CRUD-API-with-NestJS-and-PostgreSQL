@@ -3,8 +3,8 @@ import { Task } from "../tasks/task.entity";
 
 @Entity()
 export class Project{
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -12,10 +12,10 @@ export class Project{
   @Column()
   description: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({name: 'created_at'})
   createdAt: Date;
   
-  @UpdateDateColumn()
+  @UpdateDateColumn({name: 'updated_at'})
   upatedAt: Date;
 
   @OneToMany(()=>Task, (task)=> task.project)
