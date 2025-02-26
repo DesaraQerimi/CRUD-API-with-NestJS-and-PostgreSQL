@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 import { Project } from "src/projects/project.entity";
 import { User } from "src/users/user.enitity";
 
@@ -10,8 +10,8 @@ export enum Status {
 
 @Entity()
 export class Task {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;
@@ -22,15 +22,17 @@ export class Task {
   @Column({type: "enum", enum: Status, default: Status.PENDING})
   status: Status;
 
-  @CreateDateColumn()
+  @CreateDateColumn({name: 'created_at'})
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({name: 'updated_at'})
   upatedAt: Date;
 
   @ManyToOne(()=> Project, (project) => project.tasks)
+  @JoinColumn({name: 'project_id'})
   project: Project;
 
   @ManyToOne(()=> User, (user) => user.tasks)
+  @JoinColumn({name: 'user_id'})
   user: User;
 }
