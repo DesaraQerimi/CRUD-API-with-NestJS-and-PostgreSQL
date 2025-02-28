@@ -1,8 +1,8 @@
-import { Expose, Transform } from "class-transformer";
+import { Expose, Transform } from 'class-transformer';
 
 export class TaskDto {
   @Expose()
-  id:number;
+  id: number;
 
   @Expose()
   title: string;
@@ -13,11 +13,11 @@ export class TaskDto {
   @Expose()
   status: string;
 
-  @Transform(({obj}) => obj.user.id)
+  @Transform(({ obj }) => obj.user.id)
   @Expose()
   userId: string;
 
-  @Transform(({obj}) => obj.project.id)
+  @Transform(({ obj }) => obj.project.id)
   @Expose()
   projectId: string;
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Status, Task } from './task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
@@ -8,12 +12,13 @@ import { UpdateTaskDto } from './dtos/update-task.dto';
 import { User } from 'src/users/user.enitity';
 import { CreateTaskDto } from './dtos/create-task.dto';
 
-
 @Injectable()
 export class TasksService {
-  constructor(@InjectRepository(Task) private repo: Repository<Task>, 
-    private readonly projectsService: ProjectsService, 
-    private readonly usersService: UsersService){}
+  constructor(
+    @InjectRepository(Task) private repo: Repository<Task>,
+    private readonly projectsService: ProjectsService,
+    private readonly usersService: UsersService,
+  ) {}
 
   // async userTasks(): Promise<{userId: number; tasks: Task[];}[]>{
   //   const users = await this.usersService.findAll();
@@ -33,41 +38,45 @@ export class TasksService {
   //   // .getRawMany();
   // }
 
-  async getTasks(id: string): Promise<Task[]>{
-    return await this.repo.createQueryBuilder()
-    .select('title, Task.projectId')
-    .where( 'Task.userId = :id', {id: id})
-    .getRawMany();
-  } 
+  async getTasks(id: string): Promise<Task[]> {
+    return await this.repo
+      .createQueryBuilder()
+      .select('title, Task.projectId')
+      .where('Task.userId = :id', { id: id })
+      .getRawMany();
+  }
 
-
-  async create(createTask: CreateTaskDto): Promise<Task>{
+  async create(createTask: CreateTaskDto): Promise<Task> {
     const user = await this.usersService.find(createTask.userId);
     if (!user) throw new NotFoundException('User not found');
     const project = await this.projectsService.find(createTask.projectId);
     if (!project) throw new NotFoundException('Project not found');
 
-    const task = this.repo.create({
-      title: createTask.title,
-      description: createTask.description,
-      status: createTask.status,
-      user,
-      project,
-    });
+    try {
+      const task = this.repo.create({
+        ...createTask,
+        user: user,
+        project: project,
+      });
 
-    return this.repo.save(task);
+      return this.repo.save(task);
+    } catch (err) {
+      throw new InternalServerErrorException(
+        'Task creation failed',
+        err.message,
+      );
+    }
   }
 
-  async find(id: string): Promise<Task>{
-    const task = await this.repo.findOne({where: {id}});
-    if(!task) throw new NotFoundException('Task not found');
+  async find(id: string): Promise<Task> {
+    const task = await this.repo.findOne({ where: { id } });
+    if (!task) throw new NotFoundException('Task not found');
     return task;
   }
 
-  async update(id: string, newData: UpdateTaskDto): Promise<Task>{
-      
+  async update(id: string, newData: UpdateTaskDto): Promise<Task> {
     const task = await this.find(id);
-    if(!task){
+    if (!task) {
       throw new NotFoundException('task not found');
     }
 
@@ -76,39 +85,50 @@ export class TasksService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      task.user = user; 
+      task.user = user;
     }
     if (newData.projectId) {
       const project = await this.projectsService.find(newData.projectId);
       if (!project) {
         throw new NotFoundException('Project not found');
       }
-      task.project = project; 
+      task.project = project;
     }
-    const updatedTask = {...task, ...newData};
-    return this.repo.save(updatedTask);
+    const updatedTask = { ...task, ...newData };
+    try {
+      return this.repo.save(updatedTask);
+    } catch (err) {
+      throw new InternalServerErrorException('Task update failed', err);
+    }
   }
-  
-  async remove(id: string): Promise<Task>{
+
+  async remove(id: string): Promise<Task> {
     const task = await this.find(id);
-  
-    if(!task){
+
+    if (!task) {
       throw new NotFoundException('task not found');
     }
-  
-    return this.repo.remove(task);
+
+    try {
+      return this.repo.remove(task);
+    } catch (err) {
+      throw new InternalServerErrorException('Task deletion failed!', err);
+    }
   }
 
-  async getUnfinished(): Promise<Task[]>{
-    return await this.repo.find({ where: { status: In([Status.PENDING, Status.IN_PROGRESS]) } })
+  async getUnfinished(): Promise<Task[]> {
+    return await this.repo.find({
+      where: { status: In([Status.PENDING, Status.IN_PROGRESS]) },
+    });
   }
 
-  async count(id: string): Promise<Number>{
-    const count = await this.repo.createQueryBuilder()
-    .select('count(*)')
-    .where('Task.status = :status', {status: 'Done'})
-    .andWhere( 'Task.userId = :id', {id: id})
-    .getRawOne();
+  async count(id: string): Promise<Number> {
+    const count = await this.repo
+      .createQueryBuilder()
+      .select('count(*)')
+      .where('Task.status = :status', { status: 'Done' })
+      .andWhere('Task.userId = :id', { id: id })
+      .getRawOne();
 
     return count;
   }

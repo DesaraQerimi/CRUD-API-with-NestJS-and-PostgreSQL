@@ -1,5 +1,5 @@
-import { IsEnum, IsNumber, IsString, IsUUID } from "class-validator";
-import { Status } from "../task.entity";
+import { IsEnum, IsNumber, IsString, IsUUID } from 'class-validator';
+import { Status } from '../task.entity';
 
 export class CreateTaskDto {
   @IsString()
